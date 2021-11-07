@@ -1,6 +1,7 @@
 import { HttpStatus } from "@nestjs/common";
 import { HttpException, Injectable } from "@nestjs/common";
 import { exception } from "console";
+import { AppGateway } from "src/app.gateway";
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateUserDto } from "./dto/update-user.dto";
 
@@ -9,7 +10,11 @@ import { UsersRepository } from "./users.repository";
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly usersRepository: UsersRepository) {}
+    constructor(
+        private readonly usersRepository: UsersRepository,
+        private gateway:AppGateway
+        
+        ) {}
 
     async getUserById(userId: string): Promise<User> {
         const user = await this.usersRepository.findOne({ userId });        
@@ -24,12 +29,17 @@ export class UsersService {
     }
 
     async createUser(email: string, age: number): Promise<User> {
-        return this.usersRepository.create({
+        const user = await this.usersRepository.create({
             userId: uuidv4(),
             email,
             age,
             favoriteFoods: []
         })
+
+        //socket
+        this.gateway.wss.emit('NewUser', user)
+
+        return user
     }
 
     async updateUser(userId: string, userUpdates: UpdateUserDto): Promise<User> {

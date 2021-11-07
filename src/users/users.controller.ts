@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Logger, Param, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -23,6 +24,10 @@ export class UsersController {
 
   @UsePipes(new ValidationPipe())
   @Post()
+  @ApiCreatedResponse({description:'User Create'})
+  @ApiTags('UserAdd')
+  @ApiBody({type:CreateUserDto})
+  // @ApiOkResponse({description:'User Add'})
   async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
       this.logger.log(JSON.stringify(createUserDto))
       return this.usersService.createUser(createUserDto.email, createUserDto.age)
